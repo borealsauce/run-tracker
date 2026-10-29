@@ -21,14 +21,15 @@ td{padding:7px 10px;border-top:1px solid var(--line);white-space:nowrap;overflow
 td.n,th.n{text-align:right}a{color:var(--ac);text-decoration:none}
 .rz{position:absolute;right:0;top:0;bottom:0;width:6px;cursor:col-resize}.rz:hover{background:var(--ac)}
 @media(max-width:760px){.grid{grid-template-columns:1fr}.ch{height:240px}.card .v{font-size:20px}h1{font-size:22px}}
+.seg{display:inline-flex;background:#0b1222;border:1px solid var(--line);border-radius:8px;padding:2px}.seg button{background:none;border:0;color:var(--mut);font:inherit;font-size:12px;padding:5px 10px;border-radius:6px;cursor:pointer}.seg button.on{background:var(--ac);color:#0f172a;font-weight:600}
 </style></head><body><div class="wrap">
-<h1>Run <span>Tracker</span></h1><div class="sub">MapMyRun export · Run = avg pace under 14:00/mi (bike rides excluded). The under-14:00 check uses each run's average pace, since the export has no per-mile splits. · Updated Oct 29, 2026 2:17 PM PT</div>
+<h1>Run <span>Tracker</span></h1><div class="sub">MapMyRun export · Run = avg pace under 14:00/mi (bike rides excluded). The under-14:00 check uses each run's average pace, since the export has no per-mile splits. · Updated Oct 29, 2026 2:26 PM PT</div>
 <div class="cards" id="cards"></div>
 <div class="grid">
 <div class="panel w"><h2>Pace over time (runs)</h2><div class="ch"><canvas id="cPace"></canvas></div></div>
 <div class="panel"><h2>Distance per workout</h2><div class="ch"><canvas id="cDist"></canvas></div></div>
 <div class="panel"><h2>Weekly run miles</h2><div class="ch"><canvas id="cWeek"></canvas></div></div>
-<div class="panel"><h2>Top 10 best paces</h2><div class="ch"><canvas id="cTop"></canvas></div></div>
+<div class="panel"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px"><h2 style="margin:0">Top 10 best paces</h2><div class="seg" id="topSeg"><button data-m="pace" class="on">Pace</button><button data-m="new">Newest</button><button data-m="old">Oldest</button></div></div><div class="ch"><canvas id="cTop"></canvas></div></div>
 <div class="panel"><h2>Runs vs walks</h2><div class="ch"><canvas id="cMix"></canvas></div></div>
 <div class="panel w"><h2>Steps</h2><div class="cards" id="stepCards" style="margin-bottom:14px"></div><h2>Daily steps (last 90 days)</h2><div class="ch"><canvas id="cSteps"></canvas></div><h2 style="margin-top:18px">Monthly average vs 10k goal (last 24 months)</h2><div class="ch"><canvas id="cMon"></canvas></div><p class="note">Apple Health export. For each hour the highest source (iPhone or Watch) is used, so steps aren't double counted.</p></div>
 </div>
@@ -69,8 +70,12 @@ new Chart(cDist,{type:'bar',data:{labels:nb.map(r=>ds(r.date)),datasets:[{data:n
 const wk={};runs.forEach(r=>{const d=new Date(r.date+'T12:00');d.setDate(d.getDate()-((d.getDay()+6)%7));const k=d.toISOString().slice(0,10);wk[k]=(wk[k]||0)+r.mi});
 const wks=Object.keys(wk).sort();
 new Chart(cWeek,{type:'bar',data:{labels:wks.map(k=>'Wk of '+ds(k)),datasets:[{data:wks.map(k=>+wk[k].toFixed(2)),backgroundColor:AC,borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'miles'}}}}});
-const t10=best.slice(0,10);
-new Chart(cTop,{type:'bar',data:{labels:t10.map((r,i)=>'#'+(i+1)+' '+ds(r.date)),datasets:[{data:t10.map(r=>r.pace),backgroundColor:t10.map((r,i)=>i?'rgba(34,211,238,.55)':AC),borderRadius:4}]},options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>pf(c.parsed.x)+' /mi · '+t10[c.dataIndex].mi.toFixed(2)+' mi'}}},scales:{x:{min:Math.floor(t10.length?t10[0].pace-1:0),ticks:{callback:v=>pf(v)}}}}});
+const t10=best.slice(0,10).map((r,i)=>({...r,rank:i+1}));
+const topC=new Chart(cTop,{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:[],borderRadius:4}]},options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>pf(c.parsed.x)+' /mi · '+topC.$rows[c.dataIndex].mi.toFixed(2)+' mi · '+df(topC.$rows[c.dataIndex].date)}}},scales:{x:{min:Math.floor(t10.length?t10[0].pace-1:0),ticks:{callback:v=>pf(v)}}}}});
+const topSort=m=>{const r=[...t10].sort(m=='pace'?(a,b)=>a.rank-b.rank:m=='new'?(a,b)=>b.date.localeCompare(a.date)||a.rank-b.rank:(a,b)=>a.date.localeCompare(b.date)||a.rank-b.rank);topC.$rows=r;
+topC.data.labels=r.map(x=>'#'+x.rank+' '+ds(x.date));topC.data.datasets[0].data=r.map(x=>x.pace);topC.data.datasets[0].backgroundColor=r.map(x=>x.rank==1?AC:'rgba(34,211,238,.55)');topC.update();
+topSeg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.m==m))};
+topSeg.onclick=e=>{if(e.target.dataset.m)topSort(e.target.dataset.m)};topSort('pace');
 const wl=other.filter(r=>!bike(r)).length,bk=other.length-wl;
 new Chart(cMix,{type:'doughnut',data:{labels:['Runs','Walks','Bike'],datasets:[{data:[runs.length,wl,bk],backgroundColor:[AC,MU,'#1e3a5f'],borderColor:'#1e293b',borderWidth:3}]},options:{cutout:'65%',plugins:{legend:{position:'bottom'}}}});
 // steps (Apple Health, hourly max across sources to avoid iPhone+Watch double counting)
