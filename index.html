@@ -1,33 +1,48 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Run Tracker</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f4f6fa;color:#1c2333}
-.wrap{max-width:1100px;margin:0 auto;padding:20px}
-h1{margin:0 0 4px;font-size:26px}.sub{color:#6b7385;font-size:13px;margin-bottom:18px}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:22px}
-.card{background:#fff;border-radius:14px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-.card .l{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#6b7385}.card .v{font-size:28px;font-weight:700;margin-top:6px;color:#1d4ed8}.card .s{font-size:12px;color:#6b7385;margin-top:4px}
-section{background:#fff;border-radius:14px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.07);margin-bottom:20px;overflow-x:auto}
-h2{font-size:18px;margin:0 0 10px}.note{font-size:13px;color:#6b7385;margin:0 0 10px}
-table{border-collapse:collapse;width:100%;font-size:14px;table-layout:auto}
-th{position:relative;text-align:left;background:#eef2fb;padding:8px 14px 8px 10px;cursor:pointer;white-space:nowrap;user-select:none}
-td{padding:7px 10px;border-top:1px solid #edf0f5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-td.n,th.n{text-align:right}a{color:#1d4ed8;text-decoration:none}
-.rz{position:absolute;right:0;top:0;bottom:0;width:6px;cursor:col-resize}.rz:hover{background:#c7d2fe}
-.pend{padding:14px;background:#fff7e6;border:1px solid #fde3a7;border-radius:10px;font-size:14px}
-.bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;min-width:120px}.bar i{display:block;height:100%;background:#22c55e}
+:root{--bg:#0f172a;--card:#1e293b;--line:#334155;--tx:#e2e8f0;--mut:#94a3b8;--ac:#22d3ee}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx)}
+.wrap{max-width:1200px;margin:0 auto;padding:24px 18px}
+h1{margin:0;font-size:26px;font-weight:700}h1 span{color:var(--ac)}.sub{color:var(--mut);font-size:13px;margin:6px 0 22px;line-height:1.5}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.card,.panel{background:var(--card);border:1px solid var(--line);border-radius:14px}
+.card{padding:14px 16px;border-top:3px solid var(--ac)}
+.card .l{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}.card .v{font-size:24px;font-weight:700;margin-top:6px}.card .s{font-size:12px;color:var(--mut);margin-top:4px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:16px}
+.panel{padding:16px 18px;min-width:0}.panel.w{grid-column:1/-1}
+h2{font-size:15px;font-weight:600;margin:0 0 12px}.ch{position:relative;height:280px}
+.note{font-size:12px;color:var(--mut);margin:8px 0 0}
+details{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:14px}
+summary{cursor:pointer;padding:14px 18px;font-weight:600;font-size:15px}details>div{padding:0 18px 16px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{position:relative;text-align:left;background:#0b1222;color:var(--mut);padding:8px 14px 8px 10px;cursor:pointer;white-space:nowrap;user-select:none;font-weight:600}
+td{padding:7px 10px;border-top:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+td.n,th.n{text-align:right}a{color:var(--ac);text-decoration:none}
+.rz{position:absolute;right:0;top:0;bottom:0;width:6px;cursor:col-resize}.rz:hover{background:var(--ac)}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.ch{height:240px}.card .v{font-size:20px}h1{font-size:22px}}
 </style></head><body><div class="wrap">
-<h1>🏃 Run Tracker</h1><div class="sub">Source: MapMyRun export · Run = avg pace under 14:00/mi (bike rides excluded). The under-14:00 check uses each run's average pace, since the export has no per-mile splits. · Updated Oct 29, 2026 2:09 PM PT</div>
+<h1>Run <span>Tracker</span></h1><div class="sub">MapMyRun export · Run = avg pace under 14:00/mi (bike rides excluded). The under-14:00 check uses each run's average pace, since the export has no per-mile splits. · Updated Oct 29, 2026 2:13 PM PT</div>
 <div class="cards" id="cards"></div>
-<section><h2>Runs (avg pace under 14:00/mi)</h2><table id="runs"></table></section>
-<section><h2>Best paces – top 10</h2><table id="lb"></table></section>
-<section><h2>Walks / Other</h2><table id="walks"></table></section>
-<section><h2>Daily steps</h2><div id="steps"></div></section>
+<div class="grid">
+<div class="panel w"><h2>Pace over time (runs)</h2><div class="ch"><canvas id="cPace"></canvas></div></div>
+<div class="panel"><h2>Distance per workout</h2><div class="ch"><canvas id="cDist"></canvas></div></div>
+<div class="panel"><h2>Weekly run miles</h2><div class="ch"><canvas id="cWeek"></canvas></div></div>
+<div class="panel"><h2>Top 10 best paces</h2><div class="ch"><canvas id="cTop"></canvas></div></div>
+<div class="panel"><h2>Runs vs walks</h2><div class="ch"><canvas id="cMix"></canvas></div></div>
+<div class="panel w"><h2>Daily steps</h2><div class="ch"><canvas id="cSteps"></canvas></div><p class="note" id="stepNote"></p></div>
+</div>
+<details><summary>Runs table</summary><div><table id="runs"></table></div></details>
+<details><summary>Walks / Other table</summary><div><table id="walks"></table></div></details>
+<details><summary>Steps by month</summary><div><table id="stepsT"></table></div></details>
 </div>
 <script>
 const D=[{"date": "2026-10-29", "type": "Run", "mi": 2.02, "sec": 2053, "pace": 16.9466, "steps": null, "link": "http://www.mapmyrun.com/workout/8895834631"}, {"date": "2026-10-29", "type": "Run", "mi": 2.02, "sec": 1182, "pace": 9.73666, "steps": null, "link": "http://www.mapmyrun.com/workout/8895672759"}, {"date": "2026-10-26", "type": "Run", "mi": 1.2, "sec": 2895, "pace": 40.2385, "steps": null, "link": "http://www.mapmyrun.com/workout/8895662007"}, {"date": "2026-10-25", "type": "Run", "mi": 2.0, "sec": 1281, "pace": 10.6407, "steps": null, "link": "http://www.mapmyrun.com/workout/8893654456"}, {"date": "2026-10-23", "type": "Run", "mi": 2.0, "sec": 1508, "pace": 12.536, "steps": null, "link": "http://www.mapmyrun.com/workout/8892923393"}, {"date": "2026-10-22", "type": "Run", "mi": 2.0, "sec": 1650, "pace": 13.7306, "steps": null, "link": "http://www.mapmyrun.com/workout/8892547630"}, {"date": "2026-10-21", "type": "Run", "mi": 2.01, "sec": 1539, "pace": 12.7307, "steps": null, "link": "http://www.mapmyrun.com/workout/8892263929"}, {"date": "2026-10-20", "type": "Walk", "mi": 2.0, "sec": 1725, "pace": 14.3404, "steps": null, "link": "http://www.mapmyrun.com/workout/8891214804"}, {"date": "2026-10-19", "type": "Walk", "mi": 2.01, "sec": 1620, "pace": 13.4225, "steps": null, "link": "http://www.mapmyrun.com/workout/8890657000"}, {"date": "2026-10-16", "type": "Walk", "mi": 2.02, "sec": 2122, "pace": 17.4833, "steps": null, "link": "http://www.mapmyrun.com/workout/8890642954"}, {"date": "2026-10-15", "type": "Walk", "mi": 2.02, "sec": 1770, "pace": 14.6275, "steps": null, "link": "http://www.mapmyrun.com/workout/8888810604"}, {"date": "2026-10-14", "type": "Walk", "mi": 2.02, "sec": 1514, "pace": 12.5053, "steps": null, "link": "http://www.mapmyrun.com/workout/8888295230"}, {"date": "2026-10-13", "type": "Walk", "mi": 2.01, "sec": 1288, "pace": 10.6931, "steps": null, "link": "http://www.mapmyrun.com/workout/8887780744"}, {"date": "2026-10-12", "type": "Walk", "mi": 2.02, "sec": 1581, "pace": 13.034, "steps": null, "link": "http://www.mapmyrun.com/workout/8887182922"}, {"date": "2026-10-11", "type": "Walk", "mi": 2.1, "sec": 1665, "pace": 13.1863, "steps": null, "link": "http://www.mapmyrun.com/workout/8886975915"}, {"date": "2026-10-10", "type": "Walk", "mi": 2.03, "sec": 1696, "pace": 13.9221, "steps": null, "link": "http://www.mapmyrun.com/workout/8886252808"}, {"date": "2026-10-09", "type": "Walk", "mi": 2.04, "sec": 2180, "pace": 17.8333, "steps": null, "link": "http://www.mapmyrun.com/workout/8885795519"}, {"date": "2026-10-08", "type": "Run", "mi": 2.0, "sec": 1831, "pace": 15.2338, "steps": null, "link": "http://www.mapmyrun.com/workout/8885300042"}, {"date": "2026-10-07", "type": "Run", "mi": 2.01, "sec": 1752, "pace": 14.5402, "steps": null, "link": "http://www.mapmyrun.com/workout/8884810545"}, {"date": "2026-10-06", "type": "Run", "mi": 2.02, "sec": 1791, "pace": 14.7702, "steps": null, "link": "http://www.mapmyrun.com/workout/8884129968"}, {"date": "2026-10-05", "type": "Run", "mi": 2.07, "sec": 2057, "pace": 16.5466, "steps": 5210, "link": "http://www.mapmyrun.com/workout/8883520432"}, {"date": "2026-10-03", "type": "Run", "mi": 1.17, "sec": 1405, "pace": 19.9343, "steps": 3525, "link": "http://www.mapmyrun.com/workout/8883501258"}, {"date": "2023-11-11", "type": "Bike Ride", "mi": 5.19, "sec": 3199, "pace": 10.2643, "steps": 8377, "link": "http://www.mapmyrun.com/workout/7636519990"}];
+const AC='#22d3ee',MU='#64748b',GR='#334155',TX='#94a3b8';
 const pf=p=>{let m=Math.floor(p),s=Math.round((p-m)*60);if(s==60){m++;s=0}return m+':'+String(s).padStart(2,'0')};
 const tf=t=>{const h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60;return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(s).padStart(2,'0')};
 const df=d=>new Date(d+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+const ds=d=>new Date(d+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
 const bike=r=>/bike|cycl/i.test(r.type);
 const runs=D.filter(r=>!bike(r)&&r.pace<14).sort((a,b)=>b.date.localeCompare(a.date));
 const other=D.filter(r=>!runs.includes(r)).sort((a,b)=>b.date.localeCompare(a.date));
@@ -38,21 +53,34 @@ const mon=runs.filter(r=>r.date.startsWith(ym)).reduce((s,r)=>s+r.mi,0);
 const card=(l,v,s)=>`<div class="card"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
 const lon=[...runs].sort((a,b)=>b.mi-a.mi)[0];const two=best.find(r=>r.mi>=2);
 cards.innerHTML=card('Best mile',best[0]?pf(best[0].pace)+' /mi':'—',best[0]?'fastest avg pace · '+best[0].mi.toFixed(2)+' mi · '+df(best[0].date):'')+card('Best pace on longest runs (2+ mi)',two?pf(two.pace)+' /mi':'—',two?two.mi.toFixed(2)+' mi · '+df(two.date):'')+card('Longest run',lon?lon.mi.toFixed(2)+' mi':'—',lon?pf(lon.pace)+' /mi · '+df(lon.date):'')+card('Total run miles',tot.toFixed(2),'all runs')+card('Run count',runs.length,'workouts under 14:00/mi')+card("This month's miles",mon.toFixed(2),now.toLocaleDateString('en-US',{month:'long',year:'numeric'}));
+// tables
 const head=c=>'<thead><tr>'+c.map(x=>`<th class="${x[1]||''}">${x[0]}<span class="rz"></span></th>`).join('')+'</tr></thead>';
 const row=r=>`<td data-v="${r.date}">${df(r.date)}</td><td>${r.type}</td><td class="n" data-v="${r.mi}">${r.mi.toFixed(2)}</td><td class="n" data-v="${r.sec}">${tf(r.sec)}</td><td class="n" data-v="${r.pace}">${pf(r.pace)}</td><td><a href="${r.link}">View</a></td>`;
 const C=[['Date'],['Activity'],['Miles','n'],['Time','n'],['Avg pace /mi','n'],['MapMyRun']];
-runs_tbl=(id,list)=>document.getElementById(id).innerHTML=head(C)+'<tbody>'+list.map(r=>'<tr>'+row(r)+'</tr>').join('')+'</tbody>';
-runs_tbl('runs',runs);runs_tbl('walks',other);
-lb.innerHTML=head([['Rank','n'],...C])+'<tbody>'+best.slice(0,10).map((r,i)=>`<tr><td class="n" data-v="${i+1}">${i+1}</td>`+row(r)+'</tr>').join('')+'</tbody>';
+const tbl=(id,list)=>document.getElementById(id).innerHTML=head(C)+'<tbody>'+list.map(r=>'<tr>'+row(r)+'</tr>').join('')+'</tbody>';
+tbl('runs',runs);tbl('walks',other);
+// charts
+Chart.defaults.color=TX;Chart.defaults.borderColor=GR;Chart.defaults.font.family='Inter,-apple-system,Segoe UI,Roboto,sans-serif';Chart.defaults.maintainAspectRatio=false;
+const tipPace={callbacks:{label:c=>pf(c.parsed.y??c.parsed.x)+' /mi'}};
+const ra=[...runs].reverse();
+new Chart(cPace,{type:'line',data:{labels:ra.map(r=>ds(r.date)),datasets:[{label:'Avg pace',data:ra.map(r=>r.pace),borderColor:AC,backgroundColor:'rgba(34,211,238,.15)',fill:true,tension:.3,pointRadius:4},{label:'14:00 threshold',data:ra.map(()=>14),borderColor:MU,borderDash:[6,4],pointRadius:0}]},options:{plugins:{tooltip:tipPace},scales:{y:{reverse:true,ticks:{callback:v=>pf(v)},title:{display:true,text:'min/mi (faster ↑)'}}}}});
+const nb=D.filter(r=>!bike(r)).sort((a,b)=>a.date.localeCompare(b.date));
+new Chart(cDist,{type:'bar',data:{labels:nb.map(r=>ds(r.date)),datasets:[{data:nb.map(r=>r.mi),backgroundColor:nb.map(r=>runs.includes(r)?AC:MU),borderRadius:4}]},options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(2)+' mi · '+(runs.includes(nb[c.dataIndex])?'Run':'Walk/Other')}}}},scales:{y:{title:{display:true,text:'miles'}}}}});
+const wk={};runs.forEach(r=>{const d=new Date(r.date+'T12:00');d.setDate(d.getDate()-((d.getDay()+6)%7));const k=d.toISOString().slice(0,10);wk[k]=(wk[k]||0)+r.mi});
+const wks=Object.keys(wk).sort();
+new Chart(cWeek,{type:'bar',data:{labels:wks.map(k=>'Wk of '+ds(k)),datasets:[{data:wks.map(k=>+wk[k].toFixed(2)),backgroundColor:AC,borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'miles'}}}}});
+const t10=best.slice(0,10);
+new Chart(cTop,{type:'bar',data:{labels:t10.map((r,i)=>'#'+(i+1)+' '+ds(r.date)),datasets:[{data:t10.map(r=>r.pace),backgroundColor:t10.map((r,i)=>i?'rgba(34,211,238,.55)':AC),borderRadius:4}]},options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>pf(c.parsed.x)+' /mi · '+t10[c.dataIndex].mi.toFixed(2)+' mi'}}},scales:{x:{min:Math.floor(t10.length?t10[0].pace-1:0),ticks:{callback:v=>pf(v)}}}}});
+const wl=other.filter(r=>!bike(r)).length,bk=other.length-wl;
+new Chart(cMix,{type:'doughnut',data:{labels:['Runs','Walks','Bike'],datasets:[{data:[runs.length,wl,bk],backgroundColor:[AC,MU,'#1e3a5f'],borderColor:'#1e293b',borderWidth:3}]},options:{cutout:'65%',plugins:{legend:{position:'bottom'}}}});
 // steps
 const sd={};D.forEach(r=>{if(r.steps)sd[r.date]=(sd[r.date]||0)+r.steps});
-const days=Object.keys(sd).sort().reverse();
-let sh='';
-if(!days.length)sh='<div class="pend">Apple Health export pending — daily steps will appear here once it\'s added.</div>';
-else{const mm={};days.forEach(d=>{const k=d.slice(0,7);(mm[k]=mm[k]||[]).push(sd[d])});
-sh='<p class="note">From the MapMyRun Steps column (workout steps only, not full-day totals) — Apple Health export pending for complete daily steps.</p><h2 style="font-size:15px">Monthly average vs 10,000/day goal</h2><table>'+head([['Month'],['Days with steps','n'],['Avg steps/day','n'],['% of goal','n'],['Progress']])+'<tbody>'+Object.keys(mm).sort().reverse().map(k=>{const a=mm[k].reduce((s,x)=>s+x,0)/mm[k].length,p=a/100;return `<tr><td data-v="${k}">${new Date(k+'-15').toLocaleDateString('en-US',{month:'short',year:'numeric'})}</td><td class="n">${mm[k].length}</td><td class="n" data-v="${a}">${Math.round(a).toLocaleString()}</td><td class="n" data-v="${p}">${p.toFixed(0)}%</td><td data-v="${p}"><div class="bar"><i style="width:${Math.min(p,100)}%"></i></div></td></tr>`}).join('')+'</tbody></table><h2 style="font-size:15px;margin-top:16px">By day</h2><table>'+head([['Date'],['Steps','n']])+'<tbody>'+days.map(d=>`<tr><td data-v="${d}">${df(d)}</td><td class="n" data-v="${sd[d]}">${sd[d].toLocaleString()}</td></tr>`).join('')+'</tbody></table>'}
-steps.innerHTML=sh;
-// column resize
+const days=Object.keys(sd).sort();
+stepNote.textContent=days.length?'From the MapMyRun Steps column (workout steps only, not full-day totals). Apple Health export pending for complete daily steps.':'Apple Health export pending. Daily steps will appear here once it\'s added.';
+new Chart(cSteps,{data:{labels:days.map(df),datasets:[{type:'bar',label:'Steps',data:days.map(d=>sd[d]),backgroundColor:AC,borderRadius:4},{type:'line',label:'10k goal',data:days.map(()=>10000),borderColor:'#f59e0b',borderDash:[6,4],pointRadius:0}]},options:{scales:{y:{beginAtZero:true,suggestedMax:11000}}}});
+const mm={};days.forEach(d=>{const k=d.slice(0,7);(mm[k]=mm[k]||[]).push(sd[d])});
+stepsT.innerHTML=head([['Month'],['Days','n'],['Avg steps/day','n'],['% of 10k goal','n']])+'<tbody>'+Object.keys(mm).sort().reverse().map(k=>{const a=mm[k].reduce((s,x)=>s+x,0)/mm[k].length;return `<tr><td data-v="${k}">${new Date(k+'-15').toLocaleDateString('en-US',{month:'short',year:'numeric'})}</td><td class="n">${mm[k].length}</td><td class="n" data-v="${a}">${Math.round(a).toLocaleString()}</td><td class="n" data-v="${a}">${(a/100).toFixed(0)}%</td></tr>`}).join('')+'</tbody>';
+// resize
 document.addEventListener('mousedown',e=>{if(!e.target.classList.contains('rz'))return;e.preventDefault();e.stopPropagation();const th=e.target.parentElement,x0=e.pageX,w0=th.offsetWidth;
 const mv=ev=>{th.style.width=th.style.minWidth=Math.max(40,w0+ev.pageX-x0)+'px'};const up=()=>{document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up);setTimeout(()=>window.__rz=0,0)};window.__rz=1;document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up)},true);
 document.addEventListener('click',e=>{if(e.target.classList.contains('rz')||window.__rz){e.stopPropagation();e.preventDefault()}},true);
