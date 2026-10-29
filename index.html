@@ -16,7 +16,7 @@ td.n,th.n{text-align:right}a{color:#1d4ed8;text-decoration:none}
 .pend{padding:14px;background:#fff7e6;border:1px solid #fde3a7;border-radius:10px;font-size:14px}
 .bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;min-width:120px}.bar i{display:block;height:100%;background:#22c55e}
 </style></head><body><div class="wrap">
-<h1>🏃 Run Tracker</h1><div class="sub">Source: MapMyRun export · Run = avg pace under 14:00/mi (bike rides excluded) · Updated Oct 29, 2026 2:07 PM PT</div>
+<h1>🏃 Run Tracker</h1><div class="sub">Source: MapMyRun export · Run = avg pace under 14:00/mi (bike rides excluded). The under-14:00 check uses each run's average pace, since the export has no per-mile splits. · Updated Oct 29, 2026 2:09 PM PT</div>
 <div class="cards" id="cards"></div>
 <section><h2>Runs (avg pace under 14:00/mi)</h2><table id="runs"></table></section>
 <section><h2>Best paces – top 10</h2><table id="lb"></table></section>
@@ -36,7 +36,8 @@ const tot=runs.reduce((s,r)=>s+r.mi,0);
 const now=new Date(),ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
 const mon=runs.filter(r=>r.date.startsWith(ym)).reduce((s,r)=>s+r.mi,0);
 const card=(l,v,s)=>`<div class="card"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
-cards.innerHTML=card('Best mile time',best[0]?pf(best[0].pace)+' /mi':'—',best[0]?'fastest avg pace · '+df(best[0].date):'')+card('Total run miles',tot.toFixed(2),'all runs')+card('Run count',runs.length,'workouts under 14:00/mi')+card("This month's miles",mon.toFixed(2),now.toLocaleDateString('en-US',{month:'long',year:'numeric'}));
+const lon=[...runs].sort((a,b)=>b.mi-a.mi)[0];const two=best.find(r=>r.mi>=2);
+cards.innerHTML=card('Best mile',best[0]?pf(best[0].pace)+' /mi':'—',best[0]?'fastest avg pace · '+best[0].mi.toFixed(2)+' mi · '+df(best[0].date):'')+card('Best pace on longest runs (2+ mi)',two?pf(two.pace)+' /mi':'—',two?two.mi.toFixed(2)+' mi · '+df(two.date):'')+card('Longest run',lon?lon.mi.toFixed(2)+' mi':'—',lon?pf(lon.pace)+' /mi · '+df(lon.date):'')+card('Total run miles',tot.toFixed(2),'all runs')+card('Run count',runs.length,'workouts under 14:00/mi')+card("This month's miles",mon.toFixed(2),now.toLocaleDateString('en-US',{month:'long',year:'numeric'}));
 const head=c=>'<thead><tr>'+c.map(x=>`<th class="${x[1]||''}">${x[0]}<span class="rz"></span></th>`).join('')+'</tr></thead>';
 const row=r=>`<td data-v="${r.date}">${df(r.date)}</td><td>${r.type}</td><td class="n" data-v="${r.mi}">${r.mi.toFixed(2)}</td><td class="n" data-v="${r.sec}">${tf(r.sec)}</td><td class="n" data-v="${r.pace}">${pf(r.pace)}</td><td><a href="${r.link}">View</a></td>`;
 const C=[['Date'],['Activity'],['Miles','n'],['Time','n'],['Avg pace /mi','n'],['MapMyRun']];
