@@ -1,0 +1,124 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Run Tracker</title>
+<style>
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f4f6fa;color:#1c2333}
+.wrap{max-width:1100px;margin:0 auto;padding:20px}
+h1{margin:0 0 4px;font-size:26px}.sub{color:#6b7385;font-size:13px;margin-bottom:18px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:22px}
+.card{background:#fff;border-radius:14px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.card .l{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#6b7385}.card .v{font-size:28px;font-weight:700;margin-top:6px;color:#1d4ed8}.card .s{font-size:12px;color:#6b7385;margin-top:4px}
+section{background:#fff;border-radius:14px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.07);margin-bottom:20px;overflow-x:auto}
+h2{font-size:18px;margin:0 0 10px}.note{font-size:13px;color:#6b7385;margin:0 0 10px}
+table{border-collapse:collapse;width:100%;font-size:14px;table-layout:auto}
+th{position:relative;text-align:left;background:#eef2fb;padding:8px 14px 8px 10px;cursor:pointer;white-space:nowrap;user-select:none}
+td{padding:7px 10px;border-top:1px solid #edf0f5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+td.n,th.n{text-align:right}a{color:#1d4ed8;text-decoration:none}
+.rz{position:absolute;right:0;top:0;bottom:0;width:6px;cursor:col-resize}.rz:hover{background:#c7d2fe}
+.pend{padding:14px;background:#fff7e6;border:1px solid #fde3a7;border-radius:10px;font-size:14px}
+.bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;min-width:120px}.bar i{display:block;height:100%;background:#22c55e}
+</style></head><body><div class="wrap">
+<h1>🏃 Run Tracker</h1><div class="sub">Source: MapMyRun export · Run = avg pace under 14:00/mi (bike rides excluded) · Updated Oct 29, 2026 2:07 PM PT</div>
+<div class="cards" id="cards"></div>
+<section><h2>Runs (avg pace under 14:00/mi)</h2><table id="runs"></table></section>
+<section><h2>Best paces – top 10</h2><table id="lb"></table></section>
+<section><h2>Walks / Other</h2><table id="walks"></table></section>
+<section><h2>Daily steps</h2><div id="steps"></div></section>
+</div>
+<script>
+const D=[{"date": "2026-10-29", "type": "Run", "mi": 2.02, "sec": 2053, "pace": 16.9466, "steps": null, "link": "http://www.mapmyrun.com/workout/8895834631"}, {"date": "2026-10-29", "type": "Run", "mi": 2.02, "sec": 1182, "pace": 9.73666, "steps": null, "link": "http://www.mapmyrun.com/workout/8895672759"}, {"date": "2026-10-26", "type": "Run", "mi": 1.2, "sec": 2895, "pace": 40.2385, "steps": null, "link": "http://www.mapmyrun.com/workout/8895662007"}, {"date": "2026-10-25", "type": "Run", "mi": 2.0, "sec": 1281, "pace": 10.6407, "steps": null, "link": "http://www.mapmyrun.com/workout/8893654456"}, {"date": "2026-10-23", "type": "Run", "mi": 2.0, "sec": 1508, "pace": 12.536, "steps": null, "link": "http://www.mapmyrun.com/workout/8892923393"}, {"date": "2026-10-22", "type": "Run", "mi": 2.0, "sec": 1650, "pace": 13.7306, "steps": null, "link": "http://www.mapmyrun.com/workout/8892547630"}, {"date": "2026-10-21", "type": "Run", "mi": 2.01, "sec": 1539, "pace": 12.7307, "steps": null, "link": "http://www.mapmyrun.com/workout/8892263929"}, {"date": "2026-10-20", "type": "Walk", "mi": 2.0, "sec": 1725, "pace": 14.3404, "steps": null, "link": "http://www.mapmyrun.com/workout/8891214804"}, {"date": "2026-10-19", "type": "Walk", "mi": 2.01, "sec": 1620, "pace": 13.4225, "steps": null, "link": "http://www.mapmyrun.com/workout/8890657000"}, {"date": "2026-10-16", "type": "Walk", "mi": 2.02, "sec": 2122, "pace": 17.4833, "steps": null, "link": "http://www.mapmyrun.com/workout/8890642954"}, {"date": "2026-10-15", "type": "Walk", "mi": 2.02, "sec": 1770, "pace": 14.6275, "steps": null, "link": "http://www.mapmyrun.com/workout/8888810604"}, {"date": "2026-10-14", "type": "Walk", "mi": 2.02, "sec": 1514, "pace": 12.5053, "steps": null, "link": "http://www.mapmyrun.com/workout/8888295230"}, {"date": "2026-10-13", "type": "Walk", "mi": 2.01, "sec": 1288, "pace": 10.6931, "steps": null, "link": "http://www.mapmyrun.com/workout/8887780744"}, {"date": "2026-10-12", "type": "Walk", "mi": 2.02, "sec": 1581, "pace": 13.034, "steps": null, "link": "http://www.mapmyrun.com/workout/8887182922"}, {"date": "2026-10-11", "type": "Walk", "mi": 2.1, "sec": 1665, "pace": 13.1863, "steps": null, "link": "http://www.mapmyrun.com/workout/8886975915"}, {"date": "2026-10-10", "type": "Walk", "mi": 2.03, "sec": 1696, "pace": 13.9221, "steps": null, "link": "http://www.mapmyrun.com/workout/8886252808"}, {"date": "2026-10-09", "type": "Walk", "mi": 2.04, "sec": 2180, "pace": 17.8333, "steps": null, "link": "http://www.mapmyrun.com/workout/8885795519"}, {"date": "2026-10-08", "type": "Run", "mi": 2.0, "sec": 1831, "pace": 15.2338, "steps": null, "link": "http://www.mapmyrun.com/workout/8885300042"}, {"date": "2026-10-07", "type": "Run", "mi": 2.01, "sec": 1752, "pace": 14.5402, "steps": null, "link": "http://www.mapmyrun.com/workout/8884810545"}, {"date": "2026-10-06", "type": "Run", "mi": 2.02, "sec": 1791, "pace": 14.7702, "steps": null, "link": "http://www.mapmyrun.com/workout/8884129968"}, {"date": "2026-10-05", "type": "Run", "mi": 2.07, "sec": 2057, "pace": 16.5466, "steps": 5210, "link": "http://www.mapmyrun.com/workout/8883520432"}, {"date": "2026-10-03", "type": "Run", "mi": 1.17, "sec": 1405, "pace": 19.9343, "steps": 3525, "link": "http://www.mapmyrun.com/workout/8883501258"}, {"date": "2023-11-11", "type": "Bike Ride", "mi": 5.19, "sec": 3199, "pace": 10.2643, "steps": 8377, "link": "http://www.mapmyrun.com/workout/7636519990"}];
+const pf=p=>{let m=Math.floor(p),s=Math.round((p-m)*60);if(s==60){m++;s=0}return m+':'+String(s).padStart(2,'0')};
+const tf=t=>{const h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60;return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(s).padStart(2,'0')};
+const df=d=>new Date(d+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+const bike=r=>/bike|cycl/i.test(r.type);
+const runs=D.filter(r=>!bike(r)&&r.pace<14).sort((a,b)=>b.date.localeCompare(a.date));
+const other=D.filter(r=>!runs.includes(r)).sort((a,b)=>b.date.localeCompare(a.date));
+const best=[...runs].sort((a,b)=>a.pace-b.pace);
+const tot=runs.reduce((s,r)=>s+r.mi,0);
+const now=new Date(),ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+const mon=runs.filter(r=>r.date.startsWith(ym)).reduce((s,r)=>s+r.mi,0);
+const card=(l,v,s)=>`<div class="card"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
+cards.innerHTML=card('Best mile time',best[0]?pf(best[0].pace)+' /mi':'—',best[0]?'fastest avg pace · '+df(best[0].date):'')+card('Total run miles',tot.toFixed(2),'all runs')+card('Run count',runs.length,'workouts under 14:00/mi')+card("This month's miles",mon.toFixed(2),now.toLocaleDateString('en-US',{month:'long',year:'numeric'}));
+const head=c=>'<thead><tr>'+c.map(x=>`<th class="${x[1]||''}">${x[0]}<span class="rz"></span></th>`).join('')+'</tr></thead>';
+const row=r=>`<td data-v="${r.date}">${df(r.date)}</td><td>${r.type}</td><td class="n" data-v="${r.mi}">${r.mi.toFixed(2)}</td><td class="n" data-v="${r.sec}">${tf(r.sec)}</td><td class="n" data-v="${r.pace}">${pf(r.pace)}</td><td><a href="${r.link}">View</a></td>`;
+const C=[['Date'],['Activity'],['Miles','n'],['Time','n'],['Avg pace /mi','n'],['MapMyRun']];
+runs_tbl=(id,list)=>document.getElementById(id).innerHTML=head(C)+'<tbody>'+list.map(r=>'<tr>'+row(r)+'</tr>').join('')+'</tbody>';
+runs_tbl('runs',runs);runs_tbl('walks',other);
+lb.innerHTML=head([['Rank','n'],...C])+'<tbody>'+best.slice(0,10).map((r,i)=>`<tr><td class="n" data-v="${i+1}">${i+1}</td>`+row(r)+'</tr>').join('')+'</tbody>';
+// steps
+const sd={};D.forEach(r=>{if(r.steps)sd[r.date]=(sd[r.date]||0)+r.steps});
+const days=Object.keys(sd).sort().reverse();
+let sh='';
+if(!days.length)sh='<div class="pend">Apple Health export pending — daily steps will appear here once it\'s added.</div>';
+else{const mm={};days.forEach(d=>{const k=d.slice(0,7);(mm[k]=mm[k]||[]).push(sd[d])});
+sh='<p class="note">From the MapMyRun Steps column (workout steps only, not full-day totals) — Apple Health export pending for complete daily steps.</p><h2 style="font-size:15px">Monthly average vs 10,000/day goal</h2><table>'+head([['Month'],['Days with steps','n'],['Avg steps/day','n'],['% of goal','n'],['Progress']])+'<tbody>'+Object.keys(mm).sort().reverse().map(k=>{const a=mm[k].reduce((s,x)=>s+x,0)/mm[k].length,p=a/100;return `<tr><td data-v="${k}">${new Date(k+'-15').toLocaleDateString('en-US',{month:'short',year:'numeric'})}</td><td class="n">${mm[k].length}</td><td class="n" data-v="${a}">${Math.round(a).toLocaleString()}</td><td class="n" data-v="${p}">${p.toFixed(0)}%</td><td data-v="${p}"><div class="bar"><i style="width:${Math.min(p,100)}%"></i></div></td></tr>`}).join('')+'</tbody></table><h2 style="font-size:15px;margin-top:16px">By day</h2><table>'+head([['Date'],['Steps','n']])+'<tbody>'+days.map(d=>`<tr><td data-v="${d}">${df(d)}</td><td class="n" data-v="${sd[d]}">${sd[d].toLocaleString()}</td></tr>`).join('')+'</tbody></table>'}
+steps.innerHTML=sh;
+// column resize
+document.addEventListener('mousedown',e=>{if(!e.target.classList.contains('rz'))return;e.preventDefault();e.stopPropagation();const th=e.target.parentElement,x0=e.pageX,w0=th.offsetWidth;
+const mv=ev=>{th.style.width=th.style.minWidth=Math.max(40,w0+ev.pageX-x0)+'px'};const up=()=>{document.removeEventListener('mousemove',mv);document.removeEventListener('mouseup',up);setTimeout(()=>window.__rz=0,0)};window.__rz=1;document.addEventListener('mousemove',mv);document.addEventListener('mouseup',up)},true);
+document.addEventListener('click',e=>{if(e.target.classList.contains('rz')||window.__rz){e.stopPropagation();e.preventDefault()}},true);
+</script><!--SORTABLE-START--><script>
+/* Shared sortable tables (Grok Bot trackers). Click any header: asc/desc toggle with ▲/▼.
+   Works on dynamically rendered tables via event delegation. Totals (tfoot, .total/.ft/.tot rows,
+   or first cell TOTAL/ALL-TIME/GRAND) stay pinned at bottom. Group-label rows (fewer cells / colspan)
+   keep their members: sorting happens within each group. Uses td[data-v] when present.
+   Skip: th with own onclick, th.nosort, or table[data-nosort]. */
+(function(){
+  if(window.__sortableShared)return;window.__sortableShared=1;
+  var st=document.createElement('style');
+  st.textContent='table:not([data-nosort]) th:not(.nosort){cursor:pointer;user-select:none}th .srt-ar{font-size:.8em;opacity:.85;margin-left:3px}';
+  (document.head||document.documentElement).appendChild(st);
+  var MON={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+  function key(cell){
+    if(!cell)return null;
+    var raw=cell.dataset&&cell.dataset.v!=null?cell.dataset.v:cell.textContent;
+    var s=String(raw).replace(/[▲▼]/g,'').trim();
+    if(!s||s==='—'||s==='-'||s==='–'||/^n\/?a$/i.test(s))return null;
+    var m;
+    if((m=s.match(/^(\d{4})-(\d{2})(?:-(\d{2}))?/)))return {n:Date.UTC(+m[1],+m[2]-1,+(m[3]||1))};
+    if((m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/))){var y=+m[3];if(y<100)y+=2000;return {n:Date.UTC(y,+m[1]-1,+m[2])};}
+    if((m=s.match(/^([A-Za-z]{3})[a-z]*\.? (\d{1,2}),? (\d{4})$/))&&MON[m[1].toLowerCase()])return {n:Date.UTC(+m[3],MON[m[1].toLowerCase()]-1,+m[2])};
+    if((m=s.match(/^([A-Za-z]{3})[a-z]* (\d{4})$/))&&MON[m[1].toLowerCase()])return {n:Date.UTC(+m[2],MON[m[1].toLowerCase()]-1,1)};
+    if((m=s.match(/^Q([1-4]) (\d{4})$/i)))return {n:Date.UTC(+m[2],(+m[1]-1)*3,1)};
+    var t=s.replace(/[$,%x×\s]|USD/gi,'').replace(/^\+/,'').replace(/[−–]/g,'-');
+    var neg=/^\(.*\)$/.test(t);if(neg)t=t.slice(1,-1);
+    var mult=1;if((m=t.match(/^(-?[\d.]+)([KMB])$/i))){t=m[1];mult={k:1e3,m:1e6,b:1e9}[m[2].toLowerCase()];}
+    if(/^-?\d*\.?\d+$/.test(t))return {n:parseFloat(t)*mult*(neg?-1:1)};
+    return {s:s.toLowerCase()};
+  }
+  function pinned(r){
+    if(r.parentElement&&r.parentElement.tagName==='TFOOT')return true;
+    if(/(^|\s)(total|totals|ft|tot|sum|grand|pinned)(\s|$)/i.test(r.className))return true;
+    var c=r.cells[0];return !!c&&/^\s*(TOTAL|TOTALS|ALL-TIME|GRAND TOTAL)\b/i.test(c.textContent);
+  }
+  document.addEventListener('click',function(e){
+    var th=e.target.closest&&e.target.closest('th');if(!th||th.onclick||th.classList.contains('nosort'))return;
+    var tb=th.closest('table');if(!tb||tb.hasAttribute('data-nosort'))return;
+    var hr=th.parentElement;if(hr.parentElement.tagName==='TFOOT')return;
+    var ci=0;for(var k=0;k<hr.cells.length&&hr.cells[k]!==th;k++)ci+=hr.cells[k].colSpan||1;
+    var ncol=0;for(k=0;k<hr.cells.length;k++)ncol+=hr.cells[k].colSpan||1;
+    var dir=th.dataset.sdir==='asc'?'desc':'asc',m=dir==='asc'?1:-1;
+    tb.querySelectorAll('th').forEach(function(x){delete x.dataset.sdir;var a=x.querySelector('.srt-ar');if(a)a.remove();});
+    th.dataset.sdir=dir;var ar=document.createElement('span');ar.className='srt-ar';ar.textContent=dir==='asc'?'▲':'▼';th.appendChild(ar);
+    var bodies=tb.tBodies.length?[].slice.call(tb.tBodies):[tb];
+    bodies.forEach(function(body){
+      var all=[].slice.call(body.rows).filter(function(r){return r!==hr&&!(r.cells.length&&r.cells[0].tagName==='TH'&&!r.querySelector('td'));});
+      var pins=[],groups=[{head:null,rows:[]}];
+      all.forEach(function(r){
+        if(pinned(r)){pins.push(r);return;}
+        var w=0;for(var j=0;j<r.cells.length;j++)w+=r.cells[j].colSpan||1;
+        if(r.cells.length===1&&ncol>1)groups.push({head:r,rows:[]});else groups[groups.length-1].rows.push(r);
+      });
+      function cellAt(r){var x=0;for(var j=0;j<r.cells.length;j++){if(x===ci)return r.cells[j];x+=r.cells[j].colSpan||1;}return null;}
+      groups.forEach(function(g){
+        g.rows.sort(function(a,b){var A=key(cellAt(a)),B=key(cellAt(b));
+          if(!A&&!B)return 0;if(!A)return 1;if(!B)return -1;
+          if(A.n!=null&&B.n!=null)return (A.n-B.n)*m;
+          return String(A.s!=null?A.s:A.n).localeCompare(String(B.s!=null?B.s:B.n),undefined,{numeric:true})*m;});
+        if(g.head)body.appendChild(g.head);g.rows.forEach(function(r){body.appendChild(r);});
+      });
+      pins.forEach(function(r){body.appendChild(r);});
+    });
+  },false);
+})();
+
+</script><!--SORTABLE-END-->
+</body></html>
