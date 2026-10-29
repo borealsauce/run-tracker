@@ -22,7 +22,7 @@ td.n,th.n{text-align:right}a{color:var(--ac);text-decoration:none}
 .rz{position:absolute;right:0;top:0;bottom:0;width:6px;cursor:col-resize}.rz:hover{background:var(--ac)}
 @media(max-width:760px){.grid{grid-template-columns:1fr}.ch{height:240px}.card .v{font-size:20px}h1{font-size:22px}}
 </style></head><body><div class="wrap">
-<h1>Run <span>Tracker</span></h1><div class="sub">MapMyRun export · Run = avg pace under 14:00/mi (bike rides excluded). The under-14:00 check uses each run's average pace, since the export has no per-mile splits. · Updated Oct 29, 2026 2:15 PM PT</div>
+<h1>Run <span>Tracker</span></h1><div class="sub">MapMyRun export · Run = avg pace under 14:00/mi (bike rides excluded). The under-14:00 check uses each run's average pace, since the export has no per-mile splits. · Updated Oct 29, 2026 2:17 PM PT</div>
 <div class="cards" id="cards"></div>
 <div class="grid">
 <div class="panel w"><h2>Pace over time (runs)</h2><div class="ch"><canvas id="cPace"></canvas></div></div>
@@ -65,7 +65,7 @@ const tipPace={callbacks:{label:c=>pf(c.parsed.y??c.parsed.x)+' /mi'}};
 const ra=[...runs].reverse();
 new Chart(cPace,{type:'line',data:{labels:ra.map(r=>ds(r.date)),datasets:[{label:'Avg pace',data:ra.map(r=>r.pace),borderColor:AC,backgroundColor:'rgba(34,211,238,.15)',fill:true,tension:.3,pointRadius:4},{label:'14:00 threshold',data:ra.map(()=>14),borderColor:MU,borderDash:[6,4],pointRadius:0}]},options:{plugins:{tooltip:tipPace},scales:{y:{reverse:true,ticks:{callback:v=>pf(v)},title:{display:true,text:'min/mi (faster ↑)'}}}}});
 const nb=D.filter(r=>!bike(r)).sort((a,b)=>a.date.localeCompare(b.date));
-new Chart(cDist,{type:'bar',data:{labels:nb.map(r=>ds(r.date)),datasets:[{data:nb.map(r=>r.mi),backgroundColor:nb.map(r=>runs.includes(r)?AC:MU),borderRadius:4}]},options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(2)+' mi · '+(runs.includes(nb[c.dataIndex])?'Run':'Walk/Other')}}}},scales:{y:{title:{display:true,text:'miles'}}}}});
+new Chart(cDist,{type:'bar',data:{labels:nb.map(r=>ds(r.date)),datasets:[{data:nb.map(r=>r.mi),backgroundColor:nb.map(r=>runs.includes(r)?AC:MU),borderRadius:4}]},options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(2)+' mi · '+(runs.includes(nb[c.dataIndex])?'Run':'Walk/Other')}}}},scales:{y:{title:{display:true,text:'miles'}}}});
 const wk={};runs.forEach(r=>{const d=new Date(r.date+'T12:00');d.setDate(d.getDate()-((d.getDay()+6)%7));const k=d.toISOString().slice(0,10);wk[k]=(wk[k]||0)+r.mi});
 const wks=Object.keys(wk).sort();
 new Chart(cWeek,{type:'bar',data:{labels:wks.map(k=>'Wk of '+ds(k)),datasets:[{data:wks.map(k=>+wk[k].toFixed(2)),backgroundColor:AC,borderRadius:4}]},options:{plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'miles'}}}}});
